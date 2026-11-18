@@ -1,0 +1,13 @@
+{
+  "name": "dsh-electron-termux",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DeepSeek Harness desktop shell (Electron) for Termux, built on the upstream Web GUI",
+  "type": "module",
+  "scripts": {
+    "start": "node tools/run.mjs",
+    "start:attach": "node tools/run.mjs --url http://127.0.0.1:53120",
+    "screenshot": "node tools/run.mjs --url http://127.0.0.1:53120 --screenshot shot.png",
+    "check": "node --check app/main.mjs && node --check app/backend.mjs && node --check app/menus.mjs && node --check app/preload.cjs"
+  }
+}

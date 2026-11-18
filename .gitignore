@@ -1,0 +1,15 @@
+node_modules/
+dev/node_modules/
+
+# Upstream reference checkout: re-clone with the command in README instead of
+# shipping hundreds of megabytes of DSH sources.
+upstream/
+
+# Local verification artifacts
+backend-url.txt
+preview-bridge.png
+preview-files.png
+shot.png
+run.log
+*.o
+*.e

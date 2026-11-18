@@ -1,0 +1,9 @@
+{
+  "name": "dsh-desktop-termux",
+  "productName": "DeepSeek Harness",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "main.mjs",
+  "description": "Electron frontend for the DeepSeek Harness Web GUI, packaged for Termux (Bionic libc) on top of the termux electron43 build."
+}

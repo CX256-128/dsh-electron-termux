@@ -1,0 +1,9 @@
+{
+  "name": "dsh-shell-dev",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Development runtime for the shell. Lives outside app/ so node_modules/electron never shadows Electron's built-in module.",
+  "devDependencies": {
+    "electron": "^44.11.3"
+  }
+}

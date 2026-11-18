@@ -1,0 +1,61 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# Launch the DeepSeek Harness desktop shell with Termux's native Electron build.
+set -euo pipefail
+
+SELF_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PREFIX_DIR=${PREFIX:-/data/data/com.termux/files/usr}
+
+# Repo checkout layout (bin/ next to app/) or installed layout ($PREFIX/share).
+if [ -d "${SELF_DIR}/../app" ]; then
+  APP_DIR=$(CDPATH= cd -- "${SELF_DIR}/../app" && pwd)
+elif [ -d "${PREFIX_DIR}/share/dsh-desktop/app" ]; then
+  APP_DIR="${PREFIX_DIR}/share/dsh-desktop/app"
+else
+  echo "找不到应用目录（app/）。请从仓库运行 termux/install.sh。" >&2
+  exit 1
+fi
+
+find_electron() {
+  if [ -n "${DSH_APP_ELECTRON:-}" ] && [ -x "${DSH_APP_ELECTRON}" ]; then
+    printf '%s\n' "${DSH_APP_ELECTRON}"
+    return 0
+  fi
+  for candidate in \
+    "${PREFIX_DIR}/lib/electron43/electron" \
+    "${PREFIX_DIR}/lib/electron/electron" \
+    "$(command -v electron43 2>/dev/null || true)" \
+    "$(command -v electron 2>/dev/null || true)"; do
+    if [ -n "${candidate}" ] && [ -x "${candidate}" ]; then
+      printf '%s\n' "${candidate}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+if ! ELECTRON_BIN=$(find_electron); then
+  cat >&2 <<'MESSAGE'
+未找到 Electron 运行时。
+请先安装 Termux 的 X11 仓库与 Electron 43：
+    pkg install x11-repo
+    pkg install electron43
+也可以用 DSH_APP_ELECTRON=/path/to/electron 指定可执行文件。
+MESSAGE
+  exit 1
+fi
+
+# Termux:X11 is the display server; start it when the caller has not.
+if [ -z "${DISPLAY:-}" ] && [ "${DSH_APP_NO_X11:-0}" != "1" ] && command -v termux-x11 >/dev/null 2>&1; then
+  DISPLAY_NUMBER=${DSH_APP_DISPLAY:-:0}
+  termux-x11 "${DISPLAY_NUMBER}" >/dev/null 2>&1 &
+  export DISPLAY="${DISPLAY_NUMBER}"
+  sleep 2
+fi
+
+# Some wrappers export this; it turns the Electron binary into plain Node.
+unset ELECTRON_RUN_AS_NODE
+
+# Android disables the setuid sandbox and user namespaces, so Chromium's
+# sandbox cannot start here. The switch has to be in argv, not only appended
+# from main, because the sandbox is decided before the app's JavaScript runs.
+exec "${ELECTRON_BIN}" --no-sandbox "${APP_DIR}" "$@"
